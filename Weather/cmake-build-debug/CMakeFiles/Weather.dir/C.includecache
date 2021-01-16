@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/heartsker/Documents/Coding/HSE-C/Weather/main.c
+stdio.h
+-
+math.h
+-
+string.h
+-
+time.h
+-
+stdlib.h
+-
+

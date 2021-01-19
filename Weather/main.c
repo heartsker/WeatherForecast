@@ -167,26 +167,128 @@ char* transform_date(dateStruct date, wordCase word_case) {
     return res;
 }
 
+// Returns whether the year is leap
+int is_leap_year(dateStruct date) {
+    return (date.year % 4 == 0 && date.year % 100 != 0 || date.year % 400 == 0 ? 1 : 0);
+}
+
+// Returns number of the day in the year
+int get_day_number(dateStruct date) {
+    int len[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    if (is_leap_year(date)) len[1]++;
+
+    int num = 0;
+
+    fori(date.month - 1) num += len[i];
+
+    num += date.day + 1;
+
+    return num;
+}
+
+// Returns horoscope sign for date
+char* get_horoscope(dateStruct date) {
+    int number = get_day_number(date);
+
+    char signs[12][MAXN] = {
+            "Водолей",
+            "Рыбы",
+            "Овен",
+            "Телец",
+            "Близнецы",
+            "Рак",
+            "Лев",
+            "Дева",
+            "Весы",
+            "Скорпион",
+            "Стрелец",
+            "Козерог"
+    };
+
+    number -= 20;
+
+    if (number <= 0) {
+        char res[MAXN];
+        strcpy(res, "Козерог");
+        return res;
+    }
+
+    int ind = 0;
+
+    ind = number / 30;
+
+    return signs[ind];
+}
+
+char* get_random_phrase(FILE* In) {
+    int cnt;
+    fscanf(In, "%d", &cnt);
+
+    int n = rand() % cnt;
+    char str[MAXN];
+    fgets(str, MAXN, In);
+    fori(n + 1) fgets(str, MAXN, In);
+
+    str[strlen(str) - 1] = '\0';
+
+    return str;
+}
+
+char* get_welcome_for_city(FILE* In_City, char city[]) {
+
+    char str[MAXN];
+    strcpy(str, get_random_phrase(In_City));
+
+    strcat(str, " ");
+    //str[strlen(str) - 1] = '\0';
+    //str[strlen(str) - 1] = ' ';
+
+    char res[MAXN];
+    strcat(res, str);
+    strcat(res, city);
+    strcat(res, ".");
+
+    return res;
+}
+
+char* get_forecast(FILE *Input_City) {
+
+    char forecast[MAXN];
+
+    // Приветствие
+    char welcome_city[MAXN];
+    char city[MAXN];
+    strcpy(city, "Москва");
+    strcpy(welcome_city, get_welcome_for_city(Input_City, city));
+
+    strcat(forecast, welcome_city);
+    strcat(forecast, "\n");
+    // Дата
+    // Горокоп
+
+    return forecast;
+}
+
 int main() {
 #ifdef FILEINOUT
     FILE *In, *Out;
     In = fopen("Input.txt", "r");
     Out = fopen("Output.txt", "w");
+    FILE *Input_City;
+    Input_City = fopen("City.txt", "r");
 #endif
+    srand(time(0));
 
+    char forecast[MAXN];
+    strcpy(forecast, get_forecast(Input_City));
 
-        dateStruct date;
-        date.day = 21;
-        date.month = 1;
-        date.year = 2021;
-        char str[MAXN] = { 0 };
-        strcpy(str, transform_date(date, genitive));
-        fprintf(Out, "%s\n", str);
-
+    fprintf(Out, "%s", forecast);
 
 #ifdef FILEINOUT
     fclose(In);
     fclose(Out);
+
+    fclose(Input_City);
 #endif
 
     return 0;

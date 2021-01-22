@@ -333,16 +333,18 @@ char* to_string(int n) {
 }
 
 char* insert_data(char s[], int n) {
-    int len = strsize(s);
+    int len = strlen(s);
     char num[MAXN] = { 0 };
     strcpy(num, to_string(n));
     char res[MAXN] = { 0 };
     fori(len) {
-        if (s[i] == '$') {
+        char c = s[i];
+        if (c == '$') {
             forj(i) strncat(res, &s[j], 1);
             strcat(res, num);
             FOR(j, i + 1, len) strncat(res, &s[j], 1);
             strcpy(s, res);
+            return s;
         }
     }
     return s;
@@ -352,19 +354,27 @@ char* get_message_for_temperature(FILE* In_Temp, weatherStruct weather) {
     int cnt;
     fscanf(In_Temp, "%d", &cnt);
 
-    int ind = rand() % cnt;
+    int ind = rand() % cnt + 1;
     char str_night[MAXN] = { 0 };
     fori(ind) fgets(str_night, MAXN, In_Temp);
 
-    strcpy(str_night, insert_data(str_night, weather.temperature.low_temp_night));
-    strcpy(str_night, insert_data(str_night, weather.temperature.high_temp_night));
+    char tmp[MAXN] = { 0 };
+    strcpy(tmp, insert_data(str_night, weather.temperature.low_temp_night));
+    strcpy(str_night, tmp);
+    strcpy(tmp, "");
+    strcpy(tmp, insert_data(str_night, weather.temperature.high_temp_night));
+    strcpy(str_night, tmp);
 
-    ind = rand() % cnt + 5;
+    ind = rand() % cnt + 1;
     char str_day[MAXN] = { 0 };
     fori(ind) fgets(str_day, MAXN, In_Temp);
 
-    strcpy(str_day, insert_data(str_day, weather.temperature.low_temp_day));
-    strcpy(str_day, insert_data(str_day, weather.temperature.high_temp_day));
+    strcpy(tmp, "");
+    strcpy(tmp, insert_data(str_day, weather.temperature.low_temp_day));
+    strcpy(str_day, tmp);
+    strcpy(tmp, "");
+    strcpy(tmp, insert_data(str_day, weather.temperature.high_temp_day));
+    strcpy(str_day, tmp);
 
     strcat(str_night, str_day);
 
@@ -387,7 +397,6 @@ char* get_forecast(FILE *Input_City, FILE *Input_Temp) {
     // Горокоп
 
     // Температура
-
     weatherStruct weather;
     weather.temperature.high_temp_day = 50;
     weather.temperature.high_temp_night = 10;

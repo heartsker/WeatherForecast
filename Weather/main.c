@@ -7,6 +7,8 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <locale.h>
+
 
 // loops
 #define fori(x) for (int i = 0; i < (x); ++i)
@@ -28,13 +30,6 @@
 typedef long long ll;
 typedef long double ld;
 
-typedef struct dataStruct {
-    int low_temp_night;
-    int high_temp_night;
-    int low_temp_day;
-    int high_temp_day;
-} dataStruct;
-
 typedef struct dateStruct {
     int day;
     int month;
@@ -50,6 +45,63 @@ typedef enum wordCase {
     prepositional
 } wordCase;
 
+typedef enum cloudCase {
+    clear,
+    shiny,
+    temp_shiny,
+    temp_clear,
+    rainy,
+    cloudy,
+} cloudCase;
+
+typedef enum precipitation {
+    no,
+    rain_little,
+    rain_medium,
+    rain_hard,
+    snow,
+    hail,
+    acid_rain
+} precipitationCase;
+
+typedef enum phenomenaCase {
+    tornado,
+    squall,
+    storm,
+    breeze,
+    ice,
+    snow_storm,
+    fog,
+    smog,
+    eruption,
+    thunder_storm
+} phenomenaCase;
+
+typedef struct windStruct {
+    int velocity;
+    int dash;
+    char direction[2];
+} windStruct;
+
+typedef struct temperatureStruct {
+    int low_temp_night;
+    int high_temp_night;
+    int low_temp_day;
+    int high_temp_day;
+} temperatureStruct;
+
+typedef struct pressureStruct {
+    int pressure;
+} pressureStruct;
+
+typedef struct weatherStruct {
+    temperatureStruct temperature;
+    precipitationCase precipitation;
+    cloudCase cloudy;
+    windStruct wind;
+    phenomenaCase phenomena;
+} weatherStruct;
+
 const ld ZERO = 1e-15;
 const ld EPS = 1e-10;
 const int MAXN = 100500;
@@ -58,20 +110,6 @@ const ll INF18 = 4 * 1e18;
 const ll L0 = 0;
 
 // ------------------    CODE    ------------------ //
-
-dataStruct data;
-
-void inputData(FILE *In) {
-    fscanf(In, "%d", &data.low_temp_night);
-    fscanf(In, "%d", &data.high_temp_night);
-    fscanf(In, "%d", &data.low_temp_day);
-    fscanf(In, "%d", &data.high_temp_day);
-    return;
-}
-
-void outputData(FILE *Out) {
-
-}
 
 // Transform dd.mm.yyyy to text
 char* transform_date(dateStruct date, wordCase word_case) {
@@ -234,7 +272,7 @@ char* get_random_phrase(FILE* In) {
     return str;
 }
 
-char* get_welcome_for_city(FILE* In_City, char city[]) {
+char* get_message_for_city(FILE* In_City, char city[]) {
 
     char str[MAXN];
     strcpy(str, get_random_phrase(In_City));
@@ -251,7 +289,89 @@ char* get_welcome_for_city(FILE* In_City, char city[]) {
     return res;
 }
 
-char* get_forecast(FILE *Input_City) {
+int strsize(char s[]) {
+    int n = 0;
+    int cnt = 0;
+    while (s[n] != '\0') {
+        char c = s[n];
+        if (0 <= c && c < 256) cnt++;
+        n++;
+    }
+    if (s[n] == '\n') cnt++;
+    n = strlen(s);
+    n -= cnt;
+    n /= 2;
+    n += cnt;
+    return n;
+}
+
+char* reverse_str(char str[]) {
+    int n = strsize(str);
+    fori(strsize(str) / 2) {
+        char c = str[i];
+        str[i] = str[strlen(str) - i - 1];
+        str[strlen(str) - i - 1] = c;
+    }
+    return str;
+}
+
+char* to_string(int n) {
+    char res[MAXN] = { 0 };
+    char digit[1];
+    int negative = (n < 0);
+    n = abs(n);
+    while (n) {
+        char c;
+        c = n % 10;
+        c += '0';
+        strncat(res, &c, 1);
+        n /= 10;
+    }
+    if (negative) strcat(res, "-");
+
+    return reverse_str(res);
+}
+
+char* insert_data(char s[], int n) {
+    int len = strsize(s);
+    char num[MAXN] = { 0 };
+    strcpy(num, to_string(n));
+    char res[MAXN] = { 0 };
+    fori(len) {
+        if (s[i] == '$') {
+            forj(i) strncat(res, &s[j], 1);
+            strcat(res, num);
+            FOR(j, i + 1, len) strncat(res, &s[j], 1);
+            strcpy(s, res);
+        }
+    }
+    return s;
+}
+
+char* get_message_for_temperature(FILE* In_Temp, weatherStruct weather) {
+    int cnt;
+    fscanf(In_Temp, "%d", &cnt);
+
+    int ind = rand() % cnt;
+    char str_night[MAXN] = { 0 };
+    fori(ind) fgets(str_night, MAXN, In_Temp);
+
+    strcpy(str_night, insert_data(str_night, weather.temperature.low_temp_night));
+    strcpy(str_night, insert_data(str_night, weather.temperature.high_temp_night));
+
+    ind = rand() % cnt + 5;
+    char str_day[MAXN] = { 0 };
+    fori(ind) fgets(str_day, MAXN, In_Temp);
+
+    strcpy(str_day, insert_data(str_day, weather.temperature.low_temp_day));
+    strcpy(str_day, insert_data(str_day, weather.temperature.high_temp_day));
+
+    strcat(str_night, str_day);
+
+    return str_night;
+}
+
+char* get_forecast(FILE *Input_City, FILE *Input_Temp) {
 
     char forecast[MAXN];
 
@@ -259,12 +379,25 @@ char* get_forecast(FILE *Input_City) {
     char welcome_city[MAXN];
     char city[MAXN];
     strcpy(city, "Москва");
-    strcpy(welcome_city, get_welcome_for_city(Input_City, city));
+    strcpy(welcome_city, get_message_for_city(Input_City, city));
 
     strcat(forecast, welcome_city);
     strcat(forecast, "\n");
     // Дата
     // Горокоп
+
+    // Температура
+
+    weatherStruct weather;
+    weather.temperature.high_temp_day = 50;
+    weather.temperature.high_temp_night = 10;
+    weather.temperature.low_temp_night = -39;
+    weather.temperature.low_temp_day = 25;
+
+    char message_temperature[MAXN];
+    strcpy(message_temperature, get_message_for_temperature(Input_Temp, weather));
+    strcat(forecast, "\n");
+    strcat(forecast, message_temperature);
 
     return forecast;
 }
@@ -276,11 +409,14 @@ int main() {
     Out = fopen("Output.txt", "w");
     FILE *Input_City;
     Input_City = fopen("City.txt", "r");
+    FILE *Input_Temp;
+    Input_Temp = fopen("Temperature.txt", "r");
 #endif
     srand(time(0));
+    setlocale(LC_ALL, "Rus");
 
     char forecast[MAXN];
-    strcpy(forecast, get_forecast(Input_City));
+    strcpy(forecast, get_forecast(Input_City, Input_Temp));
 
     fprintf(Out, "%s", forecast);
 

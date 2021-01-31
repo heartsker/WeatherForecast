@@ -48,33 +48,29 @@ typedef enum wordCase {
 typedef enum cloudCase {
     clear,
     shiny,
-    temp_shiny,
-    temp_clear,
-    rainy,
+    little_cloudy,
     cloudy,
+    rainy
 } cloudCase;
 
 typedef enum precipitation {
-    no,
-    rain_little,
-    rain_medium,
-    rain_hard,
+    no_precipitation,
+    rain,
     snow,
     hail,
     acid_rain
 } precipitationCase;
 
 typedef enum phenomenaCase {
+    hurricane,
+    no_phenomena,
     tornado,
-    squall,
     storm,
-    breeze,
-    ice,
-    snow_storm,
+    naked_ice,
     fog,
-    smog,
     eruption,
-    thunder_storm
+    sand_storm,
+    revolution
 } phenomenaCase;
 
 typedef struct windStruct {
@@ -94,32 +90,107 @@ typedef struct pressureStruct {
     int pressure;
 } pressureStruct;
 
-typedef struct weatherStruct {
-    temperatureStruct temperature;
-    precipitationCase precipitation;
-    cloudCase cloudy;
-    windStruct wind;
-    phenomenaCase phenomena;
-} weatherStruct;
-
 const ld ZERO = 1e-15;
 const ld EPS = 1e-10;
-const int MAXN = 100500;
+const int MAXN = 1005;
 const int INF9 = 2 * 1e9;
 const ll INF18 = 4 * 1e18;
 const ll L0 = 0;
 
 // ------------------    CODE    ------------------ //
 
+typedef struct dataStruct {
+    dateStruct date;
+    char city[MAXN];
+    temperatureStruct temperature;
+    windStruct wind;
+    pressureStruct pressure;
+    cloudCase cloudy;
+    precipitationCase precipitation;
+    phenomenaCase phenomena;
+} dataStruct;
+
+typedef struct forecastStruct {
+    char date[MAXN];
+    char city[MAXN];
+    char temperature[MAXN];
+    char wind[MAXN];
+    char pressure[MAXN];
+    char cloud[MAXN];
+    char precipitation[MAXN];
+    char phenomena[MAXN];
+    char joke[MAXN];
+    char horoscope[MAXN];
+} forecastStruct;
+
+dataStruct data;
+forecastStruct forecast;
+
+void input(FILE* Input) {
+    fscanf(Input, "%d.%d.%d\n", &data.date.day, &data.date.month, &data.date.year);
+
+    fgets(data.city, MAXN, Input);
+    data.city[strlen(data.city) - 1] = '\0';
+
+    fscanf(Input, "%d/%d\n", &data.temperature.low_temp_day, &data.temperature.high_temp_day);
+    fscanf(Input, "%d/%d\n", &data.temperature.low_temp_night, &data.temperature.high_temp_night);
+
+    fscanf(Input, "%s\n", data.wind.direction);
+    fscanf(Input, "%d\n", &data.wind.velocity);
+    fscanf(Input, "%d\n", &data.wind.dash);
+
+    fscanf(Input, "%d\n", &data.pressure.pressure);
+
+    char tmp[MAXN] = { 0 };
+    fgets(tmp, MAXN, Input);
+    tmp[strlen(tmp) - 1] = '\0';
+    if (!strcmp(tmp, "Солнечно")) data.cloudy = shiny;
+    if (!strcmp(tmp, "Ясно")) data.cloudy = clear;
+    if (!strcmp(tmp, "Малая облачность")) data.cloudy = little_cloudy;
+    if (!strcmp(tmp, "Облачно")) data.cloudy = cloudy;
+    if (!strcmp(tmp, "Пасмурно")) data.cloudy = rainy;
+
+    fgets(tmp, MAXN, Input);
+    tmp[strlen(tmp) - 1] = '\0';
+    if (!strcmp(tmp, "Нет")) data.precipitation = no_precipitation;
+    if (!strcmp(tmp, "Дождь")) data.precipitation = rain;
+    if (!strcmp(tmp, "Снег")) data.precipitation = snow;
+    if (!strcmp(tmp, "Град")) data.precipitation = hail;
+    if (!strcmp(tmp, "Кислотный дождь")) data.precipitation = acid_rain;
+
+    fgets(tmp, MAXN, Input);
+    tmp[strlen(tmp) - 1] = '\0';
+    if (!strcmp(tmp, "Нет")) data.phenomena = no_phenomena;
+    if (!strcmp(tmp, "Ураган")) data.phenomena = hurricane;
+    if (!strcmp(tmp, "Смерч")) data.phenomena = tornado;
+    if (!strcmp(tmp, "Гроза")) data.phenomena = storm;
+    if (!strcmp(tmp, "Туман")) data.phenomena = fog;
+    if (!strcmp(tmp, "Гололедица")) data.phenomena = naked_ice;
+    if (!strcmp(tmp, "Извержение вулкана")) data.phenomena = eruption;
+    if (!strcmp(tmp, "Песчаная буря")) data.phenomena = sand_storm;
+    if (!strcmp(tmp, "Великая Октябрьская Революция")) data.phenomena = revolution;
+    // Pizdets ebaniy zhest'
+}
+
+void output(FILE* Output) {
+    fprintf(Output, "%s\n\n", forecast.city);
+
+    fprintf(Output, "%s\n\n", forecast.date);
+
+    fprintf(Output, "%s\n\n", forecast.horoscope);
+
+    fprintf(Output, "%s\n\n", forecast.temperature);
+}
+
 // Transform dd.mm.yyyy to text
-char* transform_date(dateStruct date, wordCase word_case) {
-    char res[MAXN] = { 0 };
+char* transform_date(wordCase word_case) {
+    char *res[MAXN] = { 0 };
     char day_str[MAXN] = { 0 };
     char month_str[MAXN] = { 0 };
     char year_str[MAXN] = { 0 };
-    int day = date.day;
-    int month = date.month;
-    int year = date.year;
+    int day = data.date.day;
+    int month = data.date.month;
+    int year = data.date.year;
 
     // Transform day
 
@@ -139,7 +210,7 @@ char* transform_date(dateStruct date, wordCase word_case) {
         switch (day) {
             case 1: { strcat(day_str, "перв"); break; }
             case 2: { strcat(day_str, "втор"); break; }
-            // TODO:  make individual case for digit 3 break;
+            // MARK:  make individual case for digit 3 break;
             case 4: { strcat(day_str, "четверт"); break; }
             case 5: { strcat(day_str, "пят"); break; }
             case 6: { strcat(day_str, "шест"); break; }
@@ -195,7 +266,6 @@ char* transform_date(dateStruct date, wordCase word_case) {
     }
 
     // Transform year
-
     sprintf(year_str, "%d", year);
 
     strcat(res, day_str);
@@ -206,27 +276,27 @@ char* transform_date(dateStruct date, wordCase word_case) {
 }
 
 // Returns whether the year is leap
-int is_leap_year(dateStruct date) {
-    return (date.year % 4 == 0 && date.year % 100 != 0 || date.year % 400 == 0 ? 1 : 0);
+int is_leap_year() {
+    return (data.date.year % 4 == 0 && data.date.year % 100 != 0 || data.date.year % 400 == 0 ? 1 : 0);
 }
 
 // Returns number of the day in the year
-int get_day_number(dateStruct date) {
+int get_day_number() {
     int len[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    if (is_leap_year(date)) len[1]++;
+    if (is_leap_year(data.date)) len[1]++;
 
     int num = 0;
 
-    fori(date.month - 1) num += len[i];
+    fori(data.date.month - 1) num += len[i];
 
-    num += date.day + 1;
+    num += data.date.day + 1;
 
     return num;
 }
 
 // Returns horoscope sign for date
-char* get_horoscope(dateStruct date) {
-    int number = get_day_number(date);
+char* get_horoscope() {
+    int number = get_day_number(data.date);
 
     char signs[12][MAXN] = {
             "Водолей",
@@ -246,49 +316,25 @@ char* get_horoscope(dateStruct date) {
     number -= 20;
 
     if (number <= 0) {
-        char res[MAXN];
+        char res[MAXN] = { 0 };
         strcpy(res, "Козерог");
         return res;
     }
 
     int ind = 0;
 
-    ind = number / 30;
+    char str[MAXN] = { 0 };
 
-    return signs[ind];
+
+
+    ind = number / 31;
+
+    strcpy(str, signs[ind]);
+
+    return (char*)str;
 }
 
-char* get_random_phrase(FILE* In) {
-    int cnt;
-    fscanf(In, "%d", &cnt);
-
-    int n = rand() % cnt;
-    char str[MAXN];
-    fgets(str, MAXN, In);
-    fori(n + 1) fgets(str, MAXN, In);
-
-    str[strlen(str) - 1] = '\0';
-
-    return str;
-}
-
-char* get_message_for_city(FILE* In_City, char city[]) {
-
-    char str[MAXN];
-    strcpy(str, get_random_phrase(In_City));
-
-    strcat(str, " ");
-    //str[strlen(str) - 1] = '\0';
-    //str[strlen(str) - 1] = ' ';
-
-    char res[MAXN];
-    strcat(res, str);
-    strcat(res, city);
-    strcat(res, ".");
-
-    return res;
-}
-
+// do not touch!
 int strsize(char s[]) {
     int n = 0;
     int cnt = 0;
@@ -305,8 +351,22 @@ int strsize(char s[]) {
     return n;
 }
 
+// do not touch!
+char* get_random_phrase(FILE* Input) {
+    int cnt;
+    fscanf(Input, "%d\n", &cnt);
+
+    int ind = rand() % cnt + 1;
+    char *str[MAXN] = { 0 };
+    fori(ind) {
+        fgets(str, MAXN, Input);
+    }
+
+    return str;
+}
+
+// do not touch!
 char* reverse_str(char str[]) {
-    int n = strsize(str);
     fori(strsize(str) / 2) {
         char c = str[i];
         str[i] = str[strlen(str) - i - 1];
@@ -315,6 +375,7 @@ char* reverse_str(char str[]) {
     return str;
 }
 
+// do not touch!
 char* to_string(int n) {
     char res[MAXN] = { 0 };
     char digit[1];
@@ -332,7 +393,8 @@ char* to_string(int n) {
     return reverse_str(res);
 }
 
-char* insert_data(char s[], int n) {
+// do not touch!
+char* insert_number(char *s, int n) {
     int len = strlen(s);
     char num[MAXN] = { 0 };
     strcpy(num, to_string(n));
@@ -350,65 +412,132 @@ char* insert_data(char s[], int n) {
     return s;
 }
 
-char* get_message_for_temperature(FILE* In_Temp, weatherStruct weather) {
-    int cnt;
-    fscanf(In_Temp, "%d", &cnt);
-
-    int ind = rand() % cnt + 1;
-    char str_night[MAXN] = { 0 };
-    fori(ind) fgets(str_night, MAXN, In_Temp);
-
-    char tmp[MAXN] = { 0 };
-    strcpy(tmp, insert_data(str_night, weather.temperature.low_temp_night));
-    strcpy(str_night, tmp);
-    strcpy(tmp, "");
-    strcpy(tmp, insert_data(str_night, weather.temperature.high_temp_night));
-    strcpy(str_night, tmp);
-
-    ind = rand() % cnt + 1;
-    char str_day[MAXN] = { 0 };
-    fori(ind) fgets(str_day, MAXN, In_Temp);
-
-    strcpy(tmp, "");
-    strcpy(tmp, insert_data(str_day, weather.temperature.low_temp_day));
-    strcpy(str_day, tmp);
-    strcpy(tmp, "");
-    strcpy(tmp, insert_data(str_day, weather.temperature.high_temp_day));
-    strcpy(str_day, tmp);
-
-    strcat(str_night, str_day);
-
-    return str_night;
+// do not touch!
+char* insert_string(char *s, char *n) {
+    int len = strlen(s);
+    char num[MAXN] = { 0 };
+    strcpy(num, n);
+    char res[MAXN] = { 0 };
+    fori(len) {
+        char c = s[i];
+        if (c == '$') {
+            forj(i) strncat(res, &s[j], 1);
+            strcat(res, num);
+            FOR(j, i + 1, len) strncat(res, &s[j], 1);
+            strcpy(s, res);
+            return s;
+        }
+    }
+    return s;
 }
 
-char* get_forecast(FILE *Input_City, FILE *Input_Temp) {
+// generates message for city
+void get_message_for_city(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+    strcat(str, " ");
 
-    char forecast[MAXN];
+    char res[MAXN] = { 0 };
+    strcat(res, str);
+    strcat(res, data.city);
+    strcat(res, ".");
+
+    strcpy(forecast.city, res);
+}
+
+// generates message for date
+void get_message_for_date(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+
+    char wc = str[0];
+    fori(strlen(str)) str[i] = str[i + 1];
+
+    char res[MAXN] = { 0 };
+    strcat(res, str);
+
+    char date_str[MAXN] = { 0 };
+
+    switch (wc) {
+        case '0': { strcat(date_str, transform_date(nominative));       break; }
+        case '1': { strcat(date_str, transform_date(genitive));         break; }
+        case '2': { strcat(date_str, transform_date(dative));           break; }
+        case '3': { strcat(date_str, transform_date(accusative));       break; }
+        case '4': { strcat(date_str, transform_date(instrumental));     break; }
+        case '5': { strcat(date_str, transform_date(prepositional));    break; }
+        default:                                                        break;
+    }
+
+    insert_string(res, date_str);
+
+    strcat(res, ".");
+
+    strcpy(forecast.date, res);
+}
+
+// generates message for temperature
+void get_message_for_temperature(FILE* Input_day, FILE* Input_night) {
+    char str_night[MAXN] = { 0 };
+    strcpy(str_night, get_random_phrase(Input_night));
+    str_night[strlen(str_night) - 1] = '\0';
+
+    char tmp[MAXN] = { 0 };
+    strcpy(tmp, insert_number(str_night, data.temperature.low_temp_night));
+    strcpy(str_night, tmp);
+    strcpy(tmp, "");
+    strcpy(tmp, insert_number(str_night, data.temperature.high_temp_night));
+    strcpy(str_night, tmp);
+
+    char str_day[MAXN] = { 0 };
+    strcpy(str_day, get_random_phrase(Input_day));
+    str_day[strlen(str_day) - 1] = '\0';
+
+    strcpy(tmp, "");
+    strcpy(tmp, insert_number(str_day, data.temperature.low_temp_day));
+    strcpy(str_day, tmp);
+    strcpy(tmp, "");
+    strcpy(tmp, insert_number(str_day, data.temperature.high_temp_day));
+    strcpy(str_day, tmp);
+
+    strcat(str_night, " ");
+    strcat(str_night, str_day);
+
+    strcpy(forecast.temperature, str_night);
+}
+
+void get_message_for_horoscope(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+
+    char tmp[MAXN] = { 0 };
+    char horoscope_str[MAXN] = { 0 };
+    strcpy(horoscope_str, get_horoscope());
+    strcpy(tmp, insert_string(str, horoscope_str));
+    strcpy(str, tmp);
+
+    int number = get_day_number();
+    if (number == 186) {
+        strcat(str, " Сегодня день рождения празднует великолепный преподаватель из НИУ ВШЭ, выпускница школы номер 7, НГТУ им. Алексеева и просто хороший человек - Лупанова Елена Александровна!");
+    }
+
+    strcpy(forecast.horoscope, str);
+}
+
+// generates whole forecast
+void get_forecast(FILE *Input_City, FILE *Input_Temp_day, FILE* Input_Temp_night, FILE* Input_Date, FILE* Input_Horoscope) {
 
     // Приветствие
-    char welcome_city[MAXN];
-    char city[MAXN];
-    strcpy(city, "Москва");
-    strcpy(welcome_city, get_message_for_city(Input_City, city));
-
-    strcat(forecast, welcome_city);
-    strcat(forecast, "\n");
+    // City
+    get_message_for_city(Input_City);
     // Дата
+    get_message_for_date(Input_Date);
     // Горокоп
-
+    get_message_for_horoscope(Input_Horoscope);
     // Температура
-    weatherStruct weather;
-    weather.temperature.high_temp_day = 50;
-    weather.temperature.high_temp_night = 10;
-    weather.temperature.low_temp_night = -39;
-    weather.temperature.low_temp_day = 25;
-
-    char message_temperature[MAXN];
-    strcpy(message_temperature, get_message_for_temperature(Input_Temp, weather));
-    strcat(forecast, "\n");
-    strcat(forecast, message_temperature);
-
-    return forecast;
+    get_message_for_temperature(Input_Temp_day, Input_Temp_night);
 }
 
 int main() {
@@ -418,22 +547,33 @@ int main() {
     Out = fopen("Output.txt", "w");
     FILE *Input_City;
     Input_City = fopen("City.txt", "r");
-    FILE *Input_Temp;
-    Input_Temp = fopen("Temperature.txt", "r");
+    FILE *Input_Temp_day;
+    Input_Temp_day = fopen("Temperature_day.txt", "r");
+    FILE *Input_Temp_night;
+    Input_Temp_night = fopen("Temperature_night.txt", "r");
+    FILE *Input_Date;
+    Input_Date = fopen("Date.txt", "r");
+    FILE *Input_Horoscope;
+    Input_Horoscope = fopen("Horoscope.txt", "r");
 #endif
     srand(time(0));
     setlocale(LC_ALL, "Rus");
 
-    char forecast[MAXN];
-    strcpy(forecast, get_forecast(Input_City, Input_Temp));
+    input(In);
 
-    fprintf(Out, "%s", forecast);
+    get_forecast(Input_City, Input_Temp_day, Input_Temp_night, Input_Date, Input_Horoscope);
+
+    output(Out);
 
 #ifdef FILEINOUT
     fclose(In);
     fclose(Out);
 
     fclose(Input_City);
+    fclose(Input_Temp_day);
+    fclose(Input_Temp_night);
+    fclose(Input_Date);
+    fclose(Input_Horoscope);
 #endif
 
     return 0;

@@ -86,10 +86,6 @@ typedef struct temperatureStruct {
     int high_temp_day;
 } temperatureStruct;
 
-typedef struct pressureStruct {
-    int pressure;
-} pressureStruct;
-
 const ld ZERO = 1e-15;
 const ld EPS = 1e-10;
 const int MAXN = 1005;
@@ -104,8 +100,8 @@ typedef struct dataStruct {
     char city[MAXN];
     temperatureStruct temperature;
     windStruct wind;
-    pressureStruct pressure;
-    cloudCase cloudy;
+    int pressure;
+    cloudCase cloudiness;
     precipitationCase precipitation;
     phenomenaCase phenomena;
 } dataStruct;
@@ -116,7 +112,7 @@ typedef struct forecastStruct {
     char temperature[MAXN];
     char wind[MAXN];
     char pressure[MAXN];
-    char cloud[MAXN];
+    char cloudiness[MAXN];
     char precipitation[MAXN];
     char phenomena[MAXN];
     char joke[MAXN];
@@ -139,16 +135,16 @@ void input(FILE* Input) {
     fscanf(Input, "%d\n", &data.wind.velocity);
     fscanf(Input, "%d\n", &data.wind.dash);
 
-    fscanf(Input, "%d\n", &data.pressure.pressure);
+    fscanf(Input, "%d\n", &data.pressure);
 
     char tmp[MAXN] = { 0 };
     fgets(tmp, MAXN, Input);
     tmp[strlen(tmp) - 1] = '\0';
-    if (!strcmp(tmp, "Солнечно")) data.cloudy = shiny;
-    if (!strcmp(tmp, "Ясно")) data.cloudy = clear;
-    if (!strcmp(tmp, "Малая облачность")) data.cloudy = little_cloudy;
-    if (!strcmp(tmp, "Облачно")) data.cloudy = cloudy;
-    if (!strcmp(tmp, "Пасмурно")) data.cloudy = rainy;
+    if (!strcmp(tmp, "Солнечно")) data.cloudiness = shiny;
+    if (!strcmp(tmp, "Ясно")) data.cloudiness = clear;
+    if (!strcmp(tmp, "Малая облачность")) data.cloudiness = little_cloudy;
+    if (!strcmp(tmp, "Облачно")) data.cloudiness = cloudy;
+    if (!strcmp(tmp, "Пасмурно")) data.cloudiness = rainy;
 
     fgets(tmp, MAXN, Input);
     tmp[strlen(tmp) - 1] = '\0';
@@ -180,6 +176,10 @@ void output(FILE* Output) {
     fprintf(Output, "%s\n\n", forecast.horoscope);
 
     fprintf(Output, "%s\n\n", forecast.temperature);
+
+    fprintf(Output, "%s\n\n", forecast.pressure);
+
+    fprintf(Output, "%s\n\n", forecast.cloudiness);
 }
 
 // Transform dd.mm.yyyy to text
@@ -507,6 +507,94 @@ void get_message_for_temperature(FILE* Input_day, FILE* Input_night) {
     strcpy(forecast.temperature, str_night);
 }
 
+// generates message for pressure
+void get_message_for_pressure(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+
+    char tmp[MAXN] = { 0 };
+    strcpy(tmp, insert_number(str, data.pressure));
+    strcpy(str, tmp);
+
+    strcpy(forecast.pressure, str);
+}
+
+// generates message for cloudiness
+void get_message_for_cloudiness(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+
+    char ins[MAXN] = { 0 };
+
+    switch (data.cloudiness) {
+        case clear:         { strcpy(ins, ""); break; }
+        case shiny:         { strcpy(ins, ""); break; }
+        case little_cloudy: { strcpy(ins, "Малая облачность"); break; }
+        case cloudy:        { strcpy(ins, ""); break; }
+        case rainy:         { strcpy(ins, ""); break; }
+    }
+
+    char tmp[MAXN] = { 0 };
+
+    strcpy(tmp, insert_string(str, ins));
+    strcpy(str, tmp);
+
+    strcpy(forecast.cloudiness, str);
+}
+
+// generates message for wind
+// TODO: !!!
+void get_message_for_wind(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+
+    char ins[MAXN] = { 0 };
+
+    switch (data.cloudiness) {
+        case clear:         { strcpy(ins, ""); break; }
+        case shiny:         { strcpy(ins, ""); break; }
+        case little_cloudy: { strcpy(ins, "Малая облачность"); break; }
+        case cloudy:        { strcpy(ins, ""); break; }
+        case rainy:         { strcpy(ins, ""); break; }
+    }
+
+    char tmp[MAXN] = { 0 };
+
+    strcpy(tmp, insert_string(str, ins));
+    strcpy(str, tmp);
+
+    strcpy(forecast.wind, str);
+}
+
+// generates message for wind
+// TODO: !!!
+void get_message_for_precipitation(FILE* Input) {
+    char str[MAXN] = { 0 };
+    strcpy(str, get_random_phrase(Input));
+    str[strlen(str) - 1] = '\0';
+
+    char ins[MAXN] = { 0 };
+
+    switch (data.cloudiness) {
+        case clear:         { strcpy(ins, ""); break; }
+        case shiny:         { strcpy(ins, ""); break; }
+        case little_cloudy: { strcpy(ins, "Малая облачность"); break; }
+        case cloudy:        { strcpy(ins, ""); break; }
+        case rainy:         { strcpy(ins, ""); break; }
+    }
+
+    char tmp[MAXN] = { 0 };
+
+    strcpy(tmp, insert_string(str, ins));
+    strcpy(str, tmp);
+
+    strcpy(forecast.precipitation, str);
+}
+
+// generates message for horoscope
 void get_message_for_horoscope(FILE* Input) {
     char str[MAXN] = { 0 };
     strcpy(str, get_random_phrase(Input));
@@ -527,17 +615,27 @@ void get_message_for_horoscope(FILE* Input) {
 }
 
 // generates whole forecast
-void get_forecast(FILE *Input_City, FILE *Input_Temp_day, FILE* Input_Temp_night, FILE* Input_Date, FILE* Input_Horoscope) {
+void get_forecast(FILE *Input_City,
+                  FILE *Input_Temp_day, FILE* Input_Temp_night,
+                  FILE* Input_Date,
+                  FILE* Input_Horoscope,
+                  FILE* Input_Pressure,
+                  FILE* Input_Cloudiness,
+                  FILE* Input_Wind) {
 
-    // Приветствие
-    // City
     get_message_for_city(Input_City);
-    // Дата
+
     get_message_for_date(Input_Date);
-    // Горокоп
+
     get_message_for_horoscope(Input_Horoscope);
-    // Температура
+
     get_message_for_temperature(Input_Temp_day, Input_Temp_night);
+
+    get_message_for_pressure(Input_Pressure);
+
+    get_message_for_cloudiness(Input_Cloudiness);
+
+    get_message_for_wind(Input_Wind);
 }
 
 int main() {
@@ -555,13 +653,19 @@ int main() {
     Input_Date = fopen("Date.txt", "r");
     FILE *Input_Horoscope;
     Input_Horoscope = fopen("Horoscope.txt", "r");
+    FILE *Input_Pressure;
+    Input_Pressure = fopen("Pressure.txt", "r");
+    FILE *Input_Cloudiness;
+    Input_Cloudiness = fopen("Cloudiness.txt", "r");
+    FILE *Input_Wind;
+    Input_Wind = fopen("Wind.txt", "r");
 #endif
     srand(time(0));
     setlocale(LC_ALL, "Rus");
 
     input(In);
 
-    get_forecast(Input_City, Input_Temp_day, Input_Temp_night, Input_Date, Input_Horoscope);
+    get_forecast(Input_City, Input_Temp_day, Input_Temp_night, Input_Date, Input_Horoscope, Input_Pressure, Input_Cloudiness, Input_Wind);
 
     output(Out);
 
@@ -574,6 +678,9 @@ int main() {
     fclose(Input_Temp_night);
     fclose(Input_Date);
     fclose(Input_Horoscope);
+    fclose(Input_Pressure);
+    fclose(Input_Cloudiness);
+    fclose(Input_Wind);
 #endif
 
     return 0;

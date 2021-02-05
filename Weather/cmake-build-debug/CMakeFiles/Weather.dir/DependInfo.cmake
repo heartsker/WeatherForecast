@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/Users/heartsker/Documents/Coding/HSE-C/Weather/main.c" "/Users/heartsker/Documents/Coding/HSE-C/Weather/cmake-build-debug/CMakeFiles/Weather.dir/main.c.o"
+  "/Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0/main.c" "/Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0/cmake-build-debug/CMakeFiles/Weather.dir/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "AppleClang")
 

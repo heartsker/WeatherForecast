@@ -64,10 +64,10 @@ RM = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/heartsker/Documents/Coding/HSE-C/Weather
+CMAKE_SOURCE_DIR = /Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/heartsker/Documents/Coding/HSE-C/Weather/cmake-build-debug
+CMAKE_BINARY_DIR = /Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0/cmake-build-debug
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -94,14 +94,14 @@ clean: CMakeFiles/Weather.dir/clean
 CMakeFiles/Weather.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Weather.dir/build.make CMakeFiles/Weather.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Weather.dir/build.make CMakeFiles/Weather.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/heartsker/Documents/Coding/HSE-C/Weather/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target Weather"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target Weather"
 .PHONY : CMakeFiles/Weather.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Weather.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/heartsker/Documents/Coding/HSE-C/Weather/cmake-build-debug/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0/cmake-build-debug/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Weather.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/heartsker/Documents/Coding/HSE-C/Weather/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/heartsker/Documents/Coding/Stuff/Weather_update/Weather_2_0/cmake-build-debug/CMakeFiles 0
 .PHONY : CMakeFiles/Weather.dir/rule
 
 # Convenience name for target.
